@@ -1,0 +1,191 @@
+// Anthony Mercurio
+// Midterm 2
+//10/28/15
+
+
+//Global Variables
+float left,right,top,bottom;
+float center;
+float appleX,appleY,appleDX,appleDY;
+float vampireX,vampireY,vampireDX,vampireDY;
+float metalX,metalY,metalDX,metalDY;
+float brx=550,bry=50,brw=100,brh=50;     //variables for the reset button
+float bpx=400,bpy=110,bpw=100,bph=50;    //variables for the pink button
+float bwx=400,bwy=50,bww=100,bwh=50;     //variables for the wall button
+
+int   r=20, g=200, b=100;
+int   counter=0;
+
+float wall=0;
+
+void setup(){
+  size(700,500);
+  background(100,150,250);
+  left=width/10;right=width*9/10;
+  top=height/3; bottom=height*9/10;
+  center=width/2;
+  reset();
+}
+
+//reset button code
+void reset(){
+  resetapple();
+  resetvampire();
+  resetmetal();
+  wall=0;
+  r=10;g=200;b=100;
+  counter=0;
+}
+
+//Reset balls using mouseclick
+void resetapple(){
+  appleX=random(center+30,right-30); appleY=random(top+30,bottom-30);
+  appleDX=random(-3,3); appleDY=random(-3,3);}
+void resetvampire(){
+  vampireX=random(center+30,right-30); vampireY=random(top+30,bottom-30);
+  vampireDX=random(-3,3); vampireDY=random(-3,3);}
+void resetmetal(){
+  metalX=random(center+30,right-30); metalY=random(top+30,bottom-30);
+  metalDX=random(-3,3); metalDY=random(-3,3);}
+  
+
+void draw(){
+  table();
+  wall();
+  balls();
+  bounce();
+  collision();
+  mouse();
+  button(brx,bry,brw,brh);
+  button(bwx,bwy,bww,bwh);
+  messages();
+}
+
+//Green Table , white background
+void table(){
+  background(250);
+  rectMode(CORNERS);
+  fill(r,g,b);
+  strokeWeight(20);
+  stroke(127,0,0);
+  rect(left,top,right,bottom);
+  
+  
+   if (wall < 1) {
+    float center=  (left+right)/2;    
+    line( center,top+10, center,bottom-10 );
+  }
+  strokeWeight(1);
+  stroke(0);
+}
+
+//W key makes balls reset
+void wall(){
+  if (wall>1) {wall=0;}
+}
+
+// Drawing color and balls
+void balls(){
+  fill(50,0,0);ellipse(appleX,appleY,30,30);
+  fill(0,150,90);ellipse(vampireX,vampireY,30,30);
+  fill(0,255,0);ellipse(metalX,metalY,30,30);
+}
+
+//General movement/bouncing off walls
+void bounce(){
+  appleX += appleDX; if (appleX<left+25 || appleX>right-25) appleDX *= -1;
+  appleY += appleDY; if (appleY<top+25 || appleY>bottom-25) appleDY *= -1;
+  
+  vampireX += vampireDX; if (vampireX<left+25 || vampireX>right-25) vampireDX *= -1;
+  vampireY += vampireDY; if (vampireY<top+25 || vampireY>bottom-25) vampireDY *= -1;
+  
+  metalX += metalDX; if (metalX<left+25 || metalX>right-25) metalDX *= -1;
+  metalY += metalDY; if (metalY<top+25 || metalY>bottom-25) metalDY *= -1;
+  
+  //balls bouncing off the walls
+  if (wall<1 && appleX<(center+25) && appleX>(center-25) ) appleDX*= -1;  
+  if (wall<1 && vampireX<(center+25) && vampireX>(center-25) ) vampireDX*= -1;
+  if (wall<1 && metalX<(center+25) && metalX>(center-25) ) metalDX*= -1;
+}
+ 
+
+
+//Bouncing off of each other
+void collision(){
+  float tmp1,tmp2;
+  if ( dist( appleX,appleY, vampireX,vampireY) < 30) {
+    tmp1=appleDX;  appleDX=vampireDX; vampireDX=tmp1;
+    tmp2=appleDY;  appleDY=vampireDY; vampireDY=tmp2;
+    counter+=1;
+  }
+  if ( dist( metalX,metalY, vampireX,vampireY) < 30) {
+    tmp1=metalDX;  metalDX=vampireDX; vampireDX=tmp1;
+    tmp2=metalDY;  metalDY=vampireDY; vampireDY=tmp2;
+    counter+=1;
+  }
+  if ( dist( appleX,appleY, metalX,metalY) < 30) {
+    tmp1=appleDX;  appleDX=metalDX;  metalDX=tmp1;
+    tmp2=appleDY;  appleDY=metalDY;  metalDY=tmp2;
+    counter+=1;
+  } 
+}
+
+//Mouse
+void mouse(){
+}
+
+//Directions
+void messages(){
+  fill(0);
+  textSize(30);
+  text("Midterm M2 Take Home", 0,30);
+  text("Anthony Mercurio", 50,60);
+  textSize(10);
+  text("RESET ALL ", brx-25,bry);
+  text("Remove Wall ",bwx-25,bwy);
+  text("Click on ball to reset.",50,100);
+  text("Number of Collisions:  "+counter,50,150);
+}
+
+//reset button code
+void button(float x, float y, float w, float h){
+  fill(100,150,200);
+  rectMode(CENTER);
+  rect(x,y,w,h);
+  fill(0);
+}
+
+//button handlers
+void mousePressed() {
+  if ( hit (mouseX,mouseY,brx,bry,brw,brh) ){reset();}
+  if ( hit (mouseX,mouseY,bwx,bwy,bww,bwh) ){wall+=1;}
+  if ( dist (mouseX,mouseY,vampireX,vampireY) <30 ){resetvampire();}
+  if ( dist (mouseX,mouseY,metalX,metalY) <30 ){resetmetal();}
+}
+
+//Test the requirements
+void keyPressed() {
+  if (key == 'q') { exit(); }
+  if (key == 'r') { reset();}
+  if (key == 'w') { wall+=1;}
+  if (key == '1') {resetapple();}
+  if (key == '2') {resetvampire();}
+  if (key == '3') {resetmetal();}
+  if (key == 't') {counter++;}
+  /*if (key == 'l') {
+  appleDX*=2;appleDY*=2;
+  vampireDX*=2;vampireDY*=2;
+  metalDX*=2;metalDY*=2;}*/
+}
+
+//boolean
+
+boolean hit (float x1,float y1,float x2,float y2,float w,float h){
+  boolean result;
+  if ( abs(x1-x2) < w/2 && abs (y1-y2) < h/2){
+    result = true;
+  } else {
+    result = false;
+  }
+  return result;
+}
